@@ -63,7 +63,16 @@ def choose_output_folder():
         import tkFileDialog as filedialog
     root = tk.Tk()
     root.withdraw()
-    folder = filedialog.askdirectory(title="Select a DMAT study folder or the Output folder")
+    try:
+        root.attributes("-topmost", True)
+    except Exception:
+        pass
+    root.update()
+    folder = filedialog.askdirectory(
+        parent=root,
+        title="Select one DMAT study folder (or Output for all studies)",
+        mustexist=True,
+    )
     root.destroy()
     return folder
 
