@@ -229,10 +229,17 @@ def write_csv(rows, destination):
         "poc_voltage_channel_name", "poc_active_power_channel_name",
         "poc_reactive_power_channel_name",
     ]
-    with open(destination, "w", newline="") as handle:
+    # Python 2's csv module requires binary mode; Python 3 uses newline="".
+    if sys.version_info[0] < 3:
+        handle = open(destination, "wb")
+    else:
+        handle = open(destination, "w", newline="")
+    try:
         writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+    finally:
+        handle.close()
 
 
 def main():
