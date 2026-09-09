@@ -252,7 +252,12 @@ def read_outx(path, dyntools, target_time, max_time_error):
 def analyse(output_folder, target_time, max_time_error):
     dyntools = load_dyntools()
     rows = []
-    for path in find_outx_files(output_folder):
+    outx_files = find_outx_files(output_folder)
+    print("Found %d OUTX file(s) below: %s" % (len(outx_files), output_folder))
+    for position, path in enumerate(outx_files, 1):
+        print("[%d/%d] Reading %s" % (
+            position, len(outx_files), os.path.relpath(path, output_folder)
+        ))
         study, test = study_and_test_names(path, output_folder)
         row = {
             "study": study,
@@ -266,6 +271,7 @@ def analyse(output_folder, target_time, max_time_error):
         except Exception as exc:
             row["status"] = "FAIL"
             row["remarks"] = "%s: %s" % (type(exc).__name__, exc)
+            print("        FAIL: %s" % row["remarks"])
         rows.append(row)
     return rows
 
