@@ -40,23 +40,27 @@ searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
 python dmat_initialization_checker.py
 ```
 
-### PSS/E 34.5 workstation launcher
+### PSS/E 34.5 and VS Code
 
-For the configured PSS/E 34.5 workstation, double-click:
+Open `dmat_initialization_checker.py` in VS Code and select **Run Python File**.
+It is safe if VS Code initially uses Python 3.14: the script automatically
+restarts itself using:
 
 ```text
-run_dmat_checker.bat
+C:\Python27\python.exe
 ```
 
-The launcher uses:
+The Python file configures these PSS/E paths internally:
 
 - `C:\Python27\python.exe`
 - `C:\Program Files (x86)\PTI\PSSE34\PSSPY27`
 - `C:\Program Files (x86)\PTI\PSSE34\PSSBIN`
 - `%USERPROFILE%\Downloads\Temporary\_Script\_Spotswood\Temporary\_Script\_Spotswood\dyntools.py`
 
-It configures `PATH` and `PYTHONPATH` only for the checker process; it does not
-change the computer's global Python settings.
+The configuration applies only to the checker process and does not change the
+computer's global Python or VS Code settings. For step-through debugging, select
+`C:\Python27\python.exe` using **Python: Select Interpreter** first; VS Code does
+not automatically attach its debugger to the relaunched child process.
 
 A folder picker opens. Select `Output`. The program creates and opens:
 
