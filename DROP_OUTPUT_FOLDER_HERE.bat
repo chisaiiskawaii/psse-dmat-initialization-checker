@@ -10,10 +10,10 @@ set "DYNTOOLS_PATH=%USERPROFILE%\Downloads\Temporary\_Script\_Spotswood\Temporar
 
 if "%~1"=="" (
     echo.
-    echo Drag the complete Output folder onto this BAT file.
+    echo Drag one DMAT study folder onto this BAT file.
     echo.
     echo Expected structure:
-    echo   Output\Any_DMAT_Name\Any_Test_Name\PSSE\results.outx
+    echo   Any_DMAT_Name\Any_Test_Name\PSSE\results.outx
     echo.
     pause
     exit /b 1
@@ -48,7 +48,7 @@ set "PATH=%PSSBIN%;%PSSPYTHON_PATH%;%DYNTOOLS_PATH%;%PATH%"
 set "PYTHONPATH=%PSSPYTHON_PATH%;%DYNTOOLS_PATH%;%PYTHONPATH%"
 
 echo.
-echo Output folder: %~1
+echo Selected folder: %~1
 echo Loading PSS/E 34.5 and scanning OUTX files...
 echo.
 
