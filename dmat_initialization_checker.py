@@ -11,6 +11,7 @@ import sys
 
 TARGET_TIME = 4.9000
 CHANNELS = {"poc_voltage": 5, "poc_active_power": 7, "poc_reactive_power": 9}
+DLL_DIRECTORY_HANDLES = []
 
 
 def choose_output_folder():
@@ -27,15 +28,100 @@ def choose_output_folder():
     return folder
 
 
+def _add_runtime_directory(path):
+    """Add a possible PSS/E Python/DLL directory to this process."""
+    if not path or not os.path.isdir(path):
+        return
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    current_path = os.environ.get("PATH", "")
+    if path.lower() not in [item.lower() for item in current_path.split(os.pathsep)]:
+        os.environ["PATH"] = path + os.pathsep + current_path
+    add_dll_directory = getattr(os, "add_dll_directory", None)
+    if add_dll_directory:
+        try:
+            DLL_DIRECTORY_HANDLES.append(add_dll_directory(path))
+        except OSError:
+            pass
+
+
+def _find_psse_dyntools():
+    """Return possible directories containing dyntools.py."""
+    roots = []
+    for variable in ("PSSPYTHON_PATH", "PSSE_ROOT", "PSSE_LOCATION", "PSSBIN"):
+        value = os.environ.get(variable)
+        if value:
+            roots.extend(value.split(os.pathsep))
+    roots.extend([
+        os.path.join(os.environ.get("ProgramFiles", r"C:\Program Files"), "PTI"),
+        os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"), "PTI"),
+    ])
+
+    found = []
+    seen = set()
+    for root in roots:
+        root = os.path.abspath(os.path.expandvars(root))
+        if not os.path.isdir(root) or root.lower() in seen:
+            continue
+        seen.add(root.lower())
+        for current, dirs, files in os.walk(root):
+            relative = os.path.relpath(current, root)
+            depth = 0 if relative == "." else relative.count(os.sep) + 1
+            if depth >= 6:
+                dirs[:] = []
+            dirs[:] = [
+                item for item in dirs
+                if item.lower() not in ("doc", "docs", "examples", "example", "help")
+            ]
+            if "dyntools.py" in [name.lower() for name in files]:
+                found.append(current)
+
+    version_tag = "PSSPY%d%d" % (sys.version_info[0], sys.version_info[1])
+    found.sort(key=lambda path: (version_tag not in path.upper(), path.lower()))
+    return found
+
+
 def load_dyntools():
     try:
         import dyntools
         return dyntools
     except ImportError:
-        raise RuntimeError(
-            "Could not import PSS/E dyntools. Run this script with the Python "
-            "environment supplied/configured by PSS/E."
-        )
+        pass
+
+    candidates = _find_psse_dyntools()
+    errors = []
+    for python_dir in candidates:
+        _add_runtime_directory(python_dir)
+        # PSSBIN is commonly beside the PSSPYxx folders or one level higher.
+        parent = os.path.dirname(python_dir)
+        for dll_dir in (
+            os.path.join(parent, "PSSBIN"),
+            os.path.join(os.path.dirname(parent), "PSSBIN"),
+        ):
+            _add_runtime_directory(dll_dir)
+        for module_name in ("psse36", "psse35", "psse34"):
+            try:
+                __import__(module_name)
+                break
+            except ImportError:
+                continue
+        try:
+            import dyntools
+            return dyntools
+        except Exception as exc:
+            errors.append("%s -> %s" % (python_dir, exc))
+
+    version = "%d.%d (%s-bit)" % (
+        sys.version_info[0], sys.version_info[1], 64 if sys.maxsize > 2 ** 32 else 32
+    )
+    details = ""
+    if candidates:
+        details = "\nDetected PSS/E folders, but they could not be loaded:\n  " + "\n  ".join(errors)
+    raise RuntimeError(
+        "Could not import PSS/E dyntools using Python %s. "
+        "Run the script from the PSS/E Command Prompt, or use a Python version "
+        "supported by your PSS/E installation.%s" % (version, details)
+    )
 
 
 def find_outx_files(output_folder):
