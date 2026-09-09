@@ -33,15 +33,25 @@ def relaunch_with_psse34_python():
         return None
     if not os.path.isfile(os.path.join(PSSE34_PSSPY, "psse34.py")):
         return None
-    if not os.path.isfile(os.path.join(PSSE34_DYNTOOLS, "dyntools.py")):
-        return None
 
     command = [PSSE34_PYTHON, os.path.abspath(__file__)] + sys.argv[1:]
+    child_environment = os.environ.copy()
+    child_environment["PATH"] = os.pathsep.join([
+        PSSE34_PSSBIN,
+        PSSE34_PSSPY,
+        PSSE34_DYNTOOLS,
+        child_environment.get("PATH", ""),
+    ])
+    child_environment["PYTHONPATH"] = os.pathsep.join([
+        PSSE34_PSSPY,
+        PSSE34_DYNTOOLS,
+        child_environment.get("PYTHONPATH", ""),
+    ])
     print(
         "VS Code started Python %d.%d. Restarting with PSS/E 34.5 Python 2.7..."
         % (sys.version_info[0], sys.version_info[1])
     )
-    return subprocess.call(command)
+    return subprocess.call(command, env=child_environment)
 
 
 def choose_output_folder():
@@ -85,6 +95,8 @@ def _find_psse_dyntools():
     roots.extend([
         os.path.join(os.environ.get("ProgramFiles", r"C:\Program Files"), "PTI"),
         os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"), "PTI"),
+        PSSE34_DYNTOOLS,
+        os.path.join(os.environ.get("USERPROFILE", ""), "Downloads"),
     ])
 
     found = []
