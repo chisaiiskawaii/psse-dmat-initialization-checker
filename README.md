@@ -33,6 +33,19 @@ Output/
 
 ## Run
 
+### Recommended: drag and drop
+
+Drag the complete `Output` folder onto:
+
+```text
+DROP_OUTPUT_FOLDER_HERE.bat
+```
+
+This starts Python 2.7 with the configured PSS/E 34.5 environment, passes the
+folder directly to the checker, displays progress for every OUTX file, and
+keeps the window open when processing finishes. This avoids a folder-selection
+window being hidden behind VS Code.
+
 The program first tries the current Python environment, then automatically
 searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
 
