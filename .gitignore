@@ -1,0 +1,5 @@
+DMAT_Initialization_Summary.csv
+*.out
+*.outx
+__pycache__/
+*.pyc
