@@ -35,16 +35,21 @@ Output/
 
 ### Recommended: drag and drop
 
-Drag the complete `Output` folder onto:
+Drag one DMAT study folder, such as `DMAT_Power_Factor_Reference`, onto:
 
 ```text
 DROP_OUTPUT_FOLDER_HERE.bat
 ```
 
-This starts Python 2.7 with the configured PSS/E 34.5 environment, passes the
-folder directly to the checker, displays progress for every OUTX file, and
-keeps the window open when processing finishes. This avoids a folder-selection
-window being hidden behind VS Code.
+This scans every `<test>/PSSE/*.outx` below that DMAT folder. The summary is
+saved as `DMAT_Initialization_Summary.csv` beside the Python file in the
+`psse-dmat-initialization-checker` program folder. Dragging the higher-level
+`Output` folder is still supported when a combined summary across multiple
+DMAT studies is wanted.
+
+The launcher starts Python 2.7 with the configured PSS/E 34.5 environment,
+displays progress for every OUTX file, and keeps the window open when processing
+finishes. This avoids a folder-selection window being hidden behind VS Code.
 
 The program first tries the current Python environment, then automatically
 searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
@@ -79,10 +84,11 @@ The switch to Python 2.7 happens before `dyntools` is imported. If the configure
 copy of `dyntools.py` has moved, the checker also performs a bounded search below
 the current user's Downloads folder.
 
-A folder picker opens. Select `Output`. The program creates and opens:
+A folder picker opens. Select a DMAT study folder or `Output`. The program
+creates and opens the summary beside the Python file:
 
 ```text
-Output\DMAT_Initialization_Summary.csv
+psse-dmat-initialization-checker\DMAT_Initialization_Summary.csv
 ```
 
 You may also provide the folder on the command line:
