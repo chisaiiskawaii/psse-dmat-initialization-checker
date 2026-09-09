@@ -62,6 +62,10 @@ computer's global Python or VS Code settings. For step-through debugging, select
 `C:\Python27\python.exe` using **Python: Select Interpreter** first; VS Code does
 not automatically attach its debugger to the relaunched child process.
 
+The switch to Python 2.7 happens before `dyntools` is imported. If the configured
+copy of `dyntools.py` has moved, the checker also performs a bounded search below
+the current user's Downloads folder.
+
 A folder picker opens. Select `Output`. The program creates and opens:
 
 ```text
