@@ -80,6 +80,11 @@ computer's global Python or VS Code settings. For step-through debugging, select
 `C:\Python27\python.exe` using **Python: Select Interpreter** first; VS Code does
 not automatically attach its debugger to the relaunched child process.
 
+The checker does not start or initialize the PSS/E application. If it is
+launched from the PSS/E GUI, it opens a separate Python 2.7 console and releases
+the PSS/E GUI immediately so the application does not remain unresponsive while
+OUTX files are being read.
+
 The switch to Python 2.7 happens before `dyntools` is imported. If the configured
 copy of `dyntools.py` has moved, the checker also performs a bounded search below
 the current user's Downloads folder.
