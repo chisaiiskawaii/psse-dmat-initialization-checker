@@ -63,7 +63,7 @@ def choose_output_folder():
         import tkFileDialog as filedialog
     root = tk.Tk()
     root.withdraw()
-    folder = filedialog.askdirectory(title="Select the Output folder")
+    folder = filedialog.askdirectory(title="Select a DMAT study folder or the Output folder")
     root.destroy()
     return folder
 
@@ -192,7 +192,13 @@ def study_and_test_names(path, output_folder):
     if psse_index is None:
         return "", ""
     test = parts[psse_index - 1] if psse_index >= 1 else ""
-    study = parts[psse_index - 2] if psse_index >= 2 else ""
+    # When the selected root is one DMAT study, the relative structure is
+    # <test>/PSSE/<file>.outx, so use the selected folder name as the study.
+    study = (
+        parts[psse_index - 2]
+        if psse_index >= 2
+        else os.path.basename(os.path.normpath(output_folder))
+    )
     return study, test
 
 
@@ -303,7 +309,10 @@ def main():
         return relaunched_result
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("output_folder", nargs="?", help="Path to the Output folder")
+    parser.add_argument(
+        "output_folder", nargs="?",
+        help="Path to one DMAT study folder or the parent Output folder",
+    )
     parser.add_argument("--time", type=float, default=TARGET_TIME, help="Target time in seconds")
     parser.add_argument(
         "--max-time-error", type=float, default=0.01,
@@ -325,7 +334,9 @@ def main():
         print("ERROR: %s" % exc)
         return 1
 
-    destination = os.path.join(output_folder, "DMAT_Initialization_Summary.csv")
+    # Keep the report beside this program, not inside the source study folders.
+    program_folder = os.path.dirname(os.path.abspath(__file__))
+    destination = os.path.join(program_folder, "DMAT_Initialization_Summary.csv")
     write_csv(rows, destination)
     failures = sum(1 for row in rows if row.get("status") == "FAIL")
     print("Processed %d OUTX file(s); %d failed to read." % (len(rows), failures))
