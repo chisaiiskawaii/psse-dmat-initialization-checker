@@ -7,11 +7,41 @@ import argparse
 import csv
 import math
 import os
+import subprocess
 import sys
 
 TARGET_TIME = 4.9000
 CHANNELS = {"poc_voltage": 5, "poc_active_power": 7, "poc_reactive_power": 9}
 DLL_DIRECTORY_HANDLES = []
+
+# PSS/E 34.5 workstation configuration. The script can initially be started
+# by VS Code with another Python version; it will restart itself with Python 2.7.
+PSSE34_PYTHON = r"C:\Python27\python.exe"
+PSSE34_ROOT = r"C:\Program Files (x86)\PTI\PSSE34"
+PSSE34_PSSBIN = os.path.join(PSSE34_ROOT, "PSSBIN")
+PSSE34_PSSPY = os.path.join(PSSE34_ROOT, "PSSPY27")
+PSSE34_DYNTOOLS = os.path.expandvars(
+    r"%USERPROFILE%\Downloads\Temporary\_Script\_Spotswood\Temporary\_Script\_Spotswood"
+)
+
+
+def relaunch_with_psse34_python():
+    """Restart under PSS/E 34.5's Python 2.7 when launched by VS Code."""
+    if sys.version_info[0:2] == (2, 7):
+        return None
+    if not os.path.isfile(PSSE34_PYTHON):
+        return None
+    if not os.path.isfile(os.path.join(PSSE34_PSSPY, "psse34.py")):
+        return None
+    if not os.path.isfile(os.path.join(PSSE34_DYNTOOLS, "dyntools.py")):
+        return None
+
+    command = [PSSE34_PYTHON, os.path.abspath(__file__)] + sys.argv[1:]
+    print(
+        "VS Code started Python %d.%d. Restarting with PSS/E 34.5 Python 2.7..."
+        % (sys.version_info[0], sys.version_info[1])
+    )
+    return subprocess.call(command)
 
 
 def choose_output_folder():
@@ -82,6 +112,13 @@ def _find_psse_dyntools():
 
 
 def load_dyntools():
+    # Prefer the known PSS/E 34.5 paths on the configured workstation.
+    for path in (PSSE34_PSSBIN, PSSE34_PSSPY, PSSE34_DYNTOOLS):
+        _add_runtime_directory(path)
+    try:
+        import psse34
+    except ImportError:
+        pass
     try:
         import dyntools
         return dyntools
@@ -243,6 +280,10 @@ def write_csv(rows, destination):
 
 
 def main():
+    relaunched_result = relaunch_with_psse34_python()
+    if relaunched_result is not None:
+        return relaunched_result
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output_folder", nargs="?", help="Path to the Output folder")
     parser.add_argument("--time", type=float, default=TARGET_TIME, help="Target time in seconds")
