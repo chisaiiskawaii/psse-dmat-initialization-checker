@@ -33,8 +33,8 @@ Output/
 
 ## Run
 
-Use the Python environment configured for your installed PSS/E version so that
-`dyntools` is available.
+The program first tries the current Python environment, then automatically
+searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
 
 ```bat
 python dmat_initialization_checker.py
@@ -51,6 +51,21 @@ You may also provide the folder on the command line:
 ```bat
 python dmat_initialization_checker.py "C:\Project\Output"
 ```
+
+### If `dyntools` still cannot be imported
+
+Python must match a version supported by the installed PSS/E release. Open the
+PSS/E Command Prompt from the Windows Start menu, change to this project folder,
+and run the script there. Alternatively, set `PSSPYTHON_PATH` to the folder
+containing `dyntools.py` before running it:
+
+```bat
+set "PSSPYTHON_PATH=C:\Program Files\PTI\PSSE35\<version>\PSSPY39"
+python dmat_initialization_checker.py
+```
+
+Replace `<version>` and `PSSPY39` with the directories actually present on the
+computer. For example, `PSSPY39` requires Python 3.9.
 
 ## Status meaning
 
