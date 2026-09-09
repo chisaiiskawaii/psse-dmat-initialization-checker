@@ -33,23 +33,23 @@ Output/
 
 ## Run
 
-### Recommended: drag and drop
+### Recommended: run from VS Code or PSS/E Python
 
-Drag one DMAT study folder, such as `DMAT_Power_Factor_Reference`, onto:
+Run:
 
-```text
-DROP_OUTPUT_FOLDER_HERE.bat
+```bat
+python dmat_initialization_checker.py
 ```
 
-This scans every `<test>/PSSE/*.outx` below that DMAT folder. The summary is
-saved as `DMAT_Initialization_Summary.csv` beside the Python file in the
-`psse-dmat-initialization-checker` program folder. Dragging the higher-level
-`Output` folder is still supported when a combined summary across multiple
-DMAT studies is wanted.
+The program switches to the configured PSS/E 34.5 Python 2.7 environment when
+needed, then displays a topmost folder-selection window. Select one DMAT study
+folder, such as `DMAT_Power_Factor_Reference`, to scan all
+`<test>/PSSE/*.outx` files below it. Alternatively, select the higher-level
+`Output` folder for a combined summary across multiple DMAT studies.
 
-The launcher starts Python 2.7 with the configured PSS/E 34.5 environment,
-displays progress for every OUTX file, and keeps the window open when processing
-finishes. This avoids a folder-selection window being hidden behind VS Code.
+The summary is saved as `DMAT_Initialization_Summary.csv` beside the Python
+file in the `psse-dmat-initialization-checker` program folder. Progress for
+every OUTX file is printed in the VS Code terminal or PSS/E Python console.
 
 The program first tries the current Python environment, then automatically
 searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
