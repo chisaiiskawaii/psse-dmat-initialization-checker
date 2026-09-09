@@ -40,6 +40,24 @@ searches common `C:\Program Files\PTI\PSSE...` locations for `dyntools.py`.
 python dmat_initialization_checker.py
 ```
 
+### PSS/E 34.5 workstation launcher
+
+For the configured PSS/E 34.5 workstation, double-click:
+
+```text
+run_dmat_checker.bat
+```
+
+The launcher uses:
+
+- `C:\Python27\python.exe`
+- `C:\Program Files (x86)\PTI\PSSE34\PSSPY27`
+- `C:\Program Files (x86)\PTI\PSSE34\PSSBIN`
+- `%USERPROFILE%\Downloads\Temporary\_Script\_Spotswood\Temporary\_Script\_Spotswood\dyntools.py`
+
+It configures `PATH` and `PYTHONPATH` only for the checker process; it does not
+change the computer's global Python settings.
+
 A folder picker opens. Select `Output`. The program creates and opens:
 
 ```text
