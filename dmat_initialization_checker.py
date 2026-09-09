@@ -27,7 +27,13 @@ PSSE34_DYNTOOLS = os.path.expandvars(
 
 def relaunch_with_psse34_python():
     """Restart under PSS/E 34.5's Python 2.7 when launched by VS Code."""
-    if sys.version_info[0:2] == (2, 7):
+    executable_name = os.path.basename(sys.executable).lower()
+    hosted_by_psse = executable_name.startswith("psse")
+    running_standalone_python27 = (
+        sys.version_info[0:2] == (2, 7)
+        and executable_name in ("python.exe", "pythonw.exe", "python")
+    )
+    if running_standalone_python27:
         return None
     if not os.path.isfile(PSSE34_PYTHON):
         return None
@@ -47,6 +53,12 @@ def relaunch_with_psse34_python():
         PSSE34_DYNTOOLS,
         child_environment.get("PYTHONPATH", ""),
     ])
+    if hosted_by_psse:
+        print("Starting the checker in a separate Python 2.7 console...")
+        # Release the PSS/E GUI immediately instead of blocking its main thread.
+        subprocess.Popen(command, env=child_environment, creationflags=0x00000010)
+        return 0
+
     print(
         "VS Code started Python %d.%d. Restarting with PSS/E 34.5 Python 2.7..."
         % (sys.version_info[0], sys.version_info[1])
@@ -133,13 +145,10 @@ def _find_psse_dyntools():
 
 
 def load_dyntools():
-    # Prefer the known PSS/E 34.5 paths on the configured workstation.
+    # dyntools reads result files without starting the PSS/E application.
+    # Add only the required module/DLL locations; do not import psse34/psspy.
     for path in (PSSE34_PSSBIN, PSSE34_PSSPY, PSSE34_DYNTOOLS):
         _add_runtime_directory(path)
-    try:
-        import psse34
-    except ImportError:
-        pass
     try:
         import dyntools
         return dyntools
@@ -157,12 +166,6 @@ def load_dyntools():
             os.path.join(os.path.dirname(parent), "PSSBIN"),
         ):
             _add_runtime_directory(dll_dir)
-        for module_name in ("psse36", "psse35", "psse34"):
-            try:
-                __import__(module_name)
-                break
-            except ImportError:
-                continue
         try:
             import dyntools
             return dyntools
